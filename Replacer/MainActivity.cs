@@ -1037,9 +1037,10 @@ namespace Replacer
             {
                 ""
             };
-            int w = 0;
+            int column = 0, w = 0;
             for (int i = 0; i < s.Length; i++)
             {
+                column++;
                 char c = s[i];
                 pages[pages.Count - 1] += c;
                 if ('\u4e00' <= c && c < '\ua000')
@@ -1054,11 +1055,12 @@ namespace Replacer
                 }
                 else if (c == '\n')
                 {
-                    pages.Add("");
+                    column = 0;
                 }
-                if ((i + 1) % 10 == 0)
+                if (column == 10)
                 {
                     pages[pages.Count - 1] += '\n';
+                    column = 10;
                 }
             }
             LinearLayout llLine = null;
