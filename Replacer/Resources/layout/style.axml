@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:id="@+id/ll_style">
+	<HorizontalScrollView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+		<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+			<Button
+				android:text="⁰"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_superscript" />
+			<Button
+				android:text="₀"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_subscript" />
+			<Button
+				android:text="Ⅰ"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_roman_numeral" />
+			<Button
+				android:text="A"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_upper" />
+			<Button
+				android:text="a"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_lower" />
+			<Button
+				android:text="ᴀ"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_small" />
+			<Button
+				android:text="ꓯ"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_turned" />
+			<Button
+				android:text="𝐀"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_bold" />
+			<Button
+				android:text="𝗔"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_sansserif_bold" />
+			<Button
+				android:text="𝐴"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_italic" />
+			<Button
+				android:text="𝘈"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_sansserif_italic" />
+			<Button
+				android:text="𝒜"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_script" />
+			<Button
+				android:text="𝔸"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_doublestruck" />
+			<Button
+				android:text="𝔄"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_fraktur" />
+		</LinearLayout>
+	</HorizontalScrollView>
+
+</LinearLayout>

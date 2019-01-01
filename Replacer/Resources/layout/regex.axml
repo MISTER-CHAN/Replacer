@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:id="@+id/ll_regex">
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+		<LinearLayout
+			android:orientation="vertical"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_weight="1">
+			<EditText
+				android:inputType="textMultiLine"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:id="@+id/et_regex"
+				android:hint="將" />
+			<EditText
+				android:inputType="textMultiLine"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:id="@+id/et_regex_new"
+				android:hint="替換爲" />
+		</LinearLayout>
+		<Button
+			android:text="替換"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/b_regex_replace" />
+	</LinearLayout>
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_weight="1">
+		<CheckBox
+			android:text="忽略大小寫"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/cb_ignore_case"
+			android:layout_weight="1" />
+		<CheckBox
+			android:text="多行"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/cb_multiline"
+			android:layout_weight="1" />
+		<CheckBox
+			android:text="單行"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/cb_singleline"
+			android:layout_weight="1" />
+	</LinearLayout>
+
+</LinearLayout>

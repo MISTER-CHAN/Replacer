@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+	android:id="@+id/ll_charmap_main"
+	android:gravity="center">
+	<LinearLayout
+		android:orientation="vertical"
+		android:layout_width="match_parent"
+		android:layout_height="256dp"
+		android:id="@+id/ll_charmap">
+		<ImageView
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:id="@+id/iv_charmap"
+		android:visibility="invisible" />
+	</LinearLayout>
+	<LinearLayout
+		android:orientation="vertical"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/ll_controller"
+		android:visibility="gone">
+		<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+			<Button
+				android:text="◀"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_charmap_prev_page"
+				android:layout_weight="1" />
+			<Button
+				android:text="▶"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_charmap_next_page"
+				android:layout_weight="1" />
+		</LinearLayout>
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:layout_weight="3">
+				<TextView
+					android:text=""
+					android:textAppearance="?android:attr/textAppearanceLarge"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:id="@+id/tv_char_preview"
+					android:gravity="center" />
+			</LinearLayout>
+			<LinearLayout
+				android:orientation="vertical"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_weight="1">
+				<LinearLayout
+					android:orientation="horizontal"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center">
+					<Spinner
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:id="@+id/s_charmap"
+						android:layout_weight="2" />
+					<EditText
+						android:inputType="textMultiLine"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:id="@+id/et_goto_char"
+						android:layout_weight="3"
+						android:hint="轉到" />
+					<Button
+						android:text="→"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:id="@+id/b_goto_char"
+						android:layout_weight="1" />
+				</LinearLayout>
+				<LinearLayout
+					android:orientation="horizontal"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center">
+					<TextView
+						android:text="U+0"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:id="@+id/tv_char_unicode"
+						android:layout_weight="1" />
+					<Button
+						android:text="選擇"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:id="@+id/b_select_char" />
+					<Button
+						android:text="複製"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:id="@+id/b_copy_char" />
+				</LinearLayout>
+			</LinearLayout>
+		</LinearLayout>
+	</LinearLayout>
+	<Button
+		android:text="打開"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:id="@+id/b_init_charmap" />
+
+</LinearLayout>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+	android:id="@+id/ll_combine">
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+		<EditText
+			android:inputType="textMultiLine"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/et_combining_char"
+			android:layout_weight="1"
+			android:hint="組合字符" />
+		<Button
+			android:text="提取"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/b_pick_combining" />
+		<Button
+			android:text="粘貼"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/b_paste_combining" />
+	</LinearLayout>
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+		<Button
+			android:text="組合"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/b_combine"
+			android:layout_weight="1" />
+		<Button
+			android:text="U̲"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/b_underline"
+			android:layout_weight="1" />
+		<Button
+			android:text="S̶"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/b_strikethrough"
+			android:layout_weight="1" />
+	</LinearLayout>
+
+</LinearLayout>

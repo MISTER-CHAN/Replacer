@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:id="@+id/ll_replace"
+	android:gravity="center">
+	<LinearLayout
+		android:orientation="vertical"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:layout_weight="1">
+		<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center">
+			<EditText
+				android:inputType="textMultiLine"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:id="@+id/et_old"
+				android:layout_weight="3"
+				android:hint="將" />
+			<Button
+				android:text="貼"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_paste_old"
+				android:layout_weight="1" />
+			<CheckBox
+				android:text="多項"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/cb_multiold" />
+		</LinearLayout>
+		<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center">
+			<EditText
+				android:inputType="textMultiLine"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:id="@+id/et_new"
+				android:layout_weight="3"
+				android:hint="替換爲" />
+			<Button
+				android:text="貼"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/b_paste_new"
+				android:layout_weight="1" />
+			<CheckBox
+				android:text="多項"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/cb_multinew"
+				android:checked="true" />
+		</LinearLayout>
+	</LinearLayout>
+	<LinearLayout
+		android:orientation="vertical"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+		<CheckBox
+			android:text="斷開"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/cb_split"
+			android:checked="true" />
+		<Button
+			android:text="替換"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/b_replace" />
+	</LinearLayout>
+
+</LinearLayout>

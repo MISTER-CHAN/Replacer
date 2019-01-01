@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+	android:id="@+id/ll_string">
+	<EditText
+		android:inputType="number"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/et_number"
+		android:layout_weight="3"
+		android:hint="數字" />
+	<Button
+		android:text="重複"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:id="@+id/b_string" />
+	<Button
+		android:text="2"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:id="@+id/b_string_2"
+		android:layout_weight="1" />
+	<Button
+		android:text="3"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:id="@+id/b_string_3"
+		android:layout_weight="1" />
+
+</LinearLayout>
