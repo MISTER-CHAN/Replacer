@@ -1060,7 +1060,7 @@ namespace Replacer
                 if (column == 10)
                 {
                     pages[pages.Count - 1] += '\n';
-                    column = 10;
+                    column = 0;
                 }
             }
             LinearLayout llLine = null;
