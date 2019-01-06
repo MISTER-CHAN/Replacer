@@ -17,7 +17,7 @@ using static Android.Graphics.PorterDuff;
 
 namespace Replacer
 {
-
+    
     public static class Extensions
     {
         public static string Mid(this string s, int start, int end)
@@ -54,14 +54,14 @@ namespace Replacer
             jyutping = Regex.Replace(jyutping, "z", "t͡s");
             jyutping = Regex.Replace(jyutping, "ng", "ŋ");
             jyutping = Regex.Replace(jyutping, "g", "k");
-            jyutping = Regex.Replace(jyutping, "([ptk])1", "$1˥");
+            jyutping = Regex.Replace(jyutping, "([ptk]̚)1", "$1˥");
             jyutping = Regex.Replace(jyutping, "1", "˥˧");
             jyutping = Regex.Replace(jyutping, "2", "˧˥");
-            jyutping = Regex.Replace(jyutping, "([ptk])3", "$1˧");
+            jyutping = Regex.Replace(jyutping, "([ptk]̚)3", "$1˧");
             jyutping = Regex.Replace(jyutping, "3", "˧˧");
             jyutping = Regex.Replace(jyutping, "4", "˨˩");
             jyutping = Regex.Replace(jyutping, "5", "˦˥");
-            jyutping = Regex.Replace(jyutping, "([ptk])6", "$1˨");
+            jyutping = Regex.Replace(jyutping, "([ptk]̚)6", "$1˨");
             jyutping = Regex.Replace(jyutping, "6", "˨˨");
             return jyutping;
         }
@@ -449,7 +449,8 @@ namespace Replacer
             new Thread(new ParameterizedThreadStart(LoadPronunciation)).Start(new string[]
             {
                 tglChars.Checked ? tvChar.Text : etString.Text,
-                sUrl.SelectedItem.ToString()
+                sUrl.SelectedItem.ToString(),
+                sSchema.SelectedItem.ToString()
             });
         }
 
@@ -1027,10 +1028,10 @@ namespace Replacer
         private void LoadPronunciation(object o)
         {
             string[] s = (string[])o;
-            LoadPronunciation(s[0], s[1]);
+            LoadPronunciation(s[0], s[1], s[2]);
         }
 
-        private void LoadPronunciation(string s, string url)
+        private void LoadPronunciation(string s, string url, string schema)
         {
             string html;
             List<string> pages = new List<string>()
@@ -1163,7 +1164,7 @@ namespace Replacer
                                 if (prons[w].Length > 0)
                                 {
                                     string t = "";
-                                    switch (sSchema.SelectedItem.ToString())
+                                    switch (schema)
                                     {
                                         case "粵語拉丁字":
                                             foreach (string pron in prons[w])
