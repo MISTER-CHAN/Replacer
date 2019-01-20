@@ -1025,6 +1025,7 @@ namespace Replacer
                 progress = "";
             }
         }
+
         private void LoadPronunciation(object o)
         {
             string[] s = (string[])o;
