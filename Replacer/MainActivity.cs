@@ -110,14 +110,16 @@ namespace Replacer
         private ClipboardManager clipboard;
         private EditText etChar, etCombiningChar, etGotoChar, etNumber, etOld, etRegex, etRegexNew, etString, etNew;
         private ImageView ivCharmap;
-        private int first = 0, selection = 0;
+        private int first = 0, lastSymbols = 0, selection = 0;
         private LinearLayout llCharmap, llCode, llController, llPronunciation;
         private readonly Paint paint = new Paint() {
             TextSize = 36
         };
+        private SeekBar sbSymbols;
         private Spinner sCharmap, sSchema, sUrl;
         private string progress = "";
         private readonly string[] descriptions = new string[0x20000];
+        private TabHostEx tabHost;
         private TextView tvChar, tvCharUnicode, tvCharDescription, tvNextChar, tvPrevChar, tvCharPreview, tvStatus;
         private ToggleButton tglChars;
         private Thread loadDescription;
@@ -135,7 +137,7 @@ namespace Replacer
 
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
-            TabHostEx tabHost = FindViewById<TabHostEx>(Resource.Id.tab_host);
+            tabHost = FindViewById<TabHostEx>(Resource.Id.tab_host);
             tabHost.Setup();
             LayoutInflater inflater = LayoutInflater.From(this);
             inflater.Inflate(Resource.Layout.replace, tabHost.TabContentView);
@@ -149,7 +151,7 @@ namespace Replacer
             inflater.Inflate(Resource.Layout.charmap, tabHost.TabContentView);
             tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("替換").SetContent(Resource.Id.ll_replace));
             tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("正則表達式").SetContent(Resource.Id.ll_regex));
-            tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("符號移動").SetContent(Resource.Id.ll_arrows));
+            tabHost.AddTab(tabHost.NewTabSpec("symbols").SetIndicator("符號移動").SetContent(Resource.Id.ll_arrows));
             tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("組合").SetContent(Resource.Id.ll_combine));
             tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("重複").SetContent(Resource.Id.ll_string));
             tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("樣式").SetContent(Resource.Id.ll_style));
@@ -183,6 +185,7 @@ namespace Replacer
             llCode = FindViewById<LinearLayout>(Resource.Id.ll_code);
             llController = FindViewById<LinearLayout>(Resource.Id.ll_controller);
             llPronunciation = FindViewById<LinearLayout>(Resource.Id.ll_pronunciation);
+            sbSymbols = FindViewById<SeekBar>(Resource.Id.sbSymbols);
             sCharmap = FindViewById<Spinner>(Resource.Id.s_charmap);
             sSchema = FindViewById<Spinner>(Resource.Id.s_schema);
             sUrl = FindViewById<Spinner>(Resource.Id.s_url);
@@ -234,8 +237,6 @@ namespace Replacer
             FindViewById<Button>(Resource.Id.b_string_3).Click += BString3_Click;
             FindViewById<Button>(Resource.Id.b_subscript).Click += BSubscript;
             FindViewById<Button>(Resource.Id.b_superscript).Click += BSuperscript;
-            FindViewById<Button>(Resource.Id.b_symbols_left).Click += BSymbolsLeft_Click;
-            FindViewById<Button>(Resource.Id.b_symbols_right).Click += BSymbolsRight_Click;
             FindViewById<Button>(Resource.Id.b_turned).Click += BTurned_Click;
             FindViewById<Button>(Resource.Id.b_underline).Click += BUnderline_Click;
             FindViewById<Button>(Resource.Id.b_unicode_encode).Click += BUnicodeEncode_Click;
@@ -243,6 +244,7 @@ namespace Replacer
             etChar.KeyPress += EtChar_KeyPress;
             etString.TextChanged += EtString_TextChanged;
             ivCharmap.Touch += IvCharmap_Touch;
+            sbSymbols.ProgressChanged += SbSymbols_ProgressChanged;
             tabHost.TabChanged += TabHost_TabChanged;
             tglChars.CheckedChange += TglChars_CheckedChange;
             tvChar.Click += TvChars_Click;
@@ -426,17 +428,27 @@ namespace Replacer
 
         private void BPickCombining_Click(object sender, EventArgs e)
         {
+            bool found = false;
+            char c = '\0';
             string combiningChar = "";
             for (int i = etString.Text.Length - 1; i >= 0; i--)
             {
-                char c = etString.Text[i];
+                c = etString.Text[i];
                 if (IsCJKUI(c))
                 {
-                    break;
+                    if (found)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
                 else
                 {
                     combiningChar = c + combiningChar;
+                    found = true;
                 }
             }
             etCombiningChar.Text = combiningChar;
@@ -461,11 +473,21 @@ namespace Replacer
 
         private void BReplace_Click(object sender, EventArgs e)
         {
+            char separator = '\0';
             string r = "", replacedString = "";
             string[] olds = new string[1], news = new string[1];
             if (cbMultiold.Checked)
             {
-                olds = etOld.Text.Split('\n');
+                char s = '\0';
+                foreach (char c in etOld.Text)
+                {
+                    if (!IsCJKUI(c))
+                    {
+                        s = c;
+                        break;
+                    }
+                }
+                olds = etOld.Text.Split(s);
             }
             else
             {
@@ -480,7 +502,17 @@ namespace Replacer
             }
             if (cbMultinew.Checked)
             {
-                news = etNew.Text.Split('\n');
+                char s = '\0';
+                foreach (char c in etNew.Text)
+                {
+                    if (!IsCJKUI(c))
+                    {
+                        s = c;
+                        break;
+                    }
+                }
+                news = etNew.Text.Split(s);
+                separator = s;
             }
             else
             {
@@ -525,7 +557,7 @@ namespace Replacer
                         r = r.Replace(f, w);
                     }
                 }
-                replacedString += r + "\n";
+                replacedString += r + separator;
             }
             etString.Text = replacedString.Substring(0, replacedString.Length - 1);
         }
@@ -754,47 +786,6 @@ namespace Replacer
             SetStringSelection(Xlit(GetStringSelecion(), "0123456789+-=()ABDEGHIJKLMNOPRTUWabcdefghijklmnoprstuvwxyz", "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ᴬᴮᴰᴱᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᴿᵀᵁᵂᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻ"));
         }
 
-        private void BSymbolsLeft_Click(object sender, EventArgs e)
-        {
-            if (etString.Text == "")
-            {
-                return;
-            }
-            string c = CleanSymbols(etString.Text), s = etString.Text;
-            for (int i = 1; i < s.Length; i++)
-            {
-                if (!IsCJKUI(char.Parse(s.Substring(i, 1))))
-                {
-                    c = c.Substring(0, i - 1) + s.Substring(i, 1) + c.Substring(i - 1);
-                }
-            }
-            etString.Text = c;
-        }
-
-        private void BSymbolsRight_Click(object sender, EventArgs e)
-        {
-            if (etString.Text == "")
-            {
-                return;
-            }
-            string c = CleanSymbols(etString.Text), s = etString.Text;
-            for (int i = 0; i < s.Length - 1; i++)
-            {
-                if (!IsCJKUI(char.Parse(s.Substring(i, 1))))
-                {
-                    if (i < c.Length)
-                    {
-                        c = c.Substring(0, i + 1) + s.Substring(i, 1) + c.Substring(i + 1);
-                    }
-                    else
-                    {
-                        c += s.Substring(i, 1);
-                    }
-                }
-            }
-            etString.Text = c;
-        }
-
         private void BTurned_Click(object sender, EventArgs e)
         {
             SetStringSelection(Xlit(GetStringSelecion(), "ABCDEFGHIJKLMNOPRSTUVWXYZ", "ꓯꓭꓛꓷꓱꓞꓨꓧꓲꓩꓘꓶꓪꓠꓳꓒꓤꓢꓕꓵꓥꓟꓫ⅄ꓜ"));
@@ -893,6 +884,10 @@ namespace Replacer
             else
             {
                 tvStatus.Text = etString.Text.Length.ToString();
+            }
+            if (tabHost.CurrentTabTag == "symbols")
+            {
+                RefreshSymbolsSb();
             }
         }
 
@@ -1217,6 +1212,52 @@ namespace Replacer
             });
         }
 
+        private void SbSymbols_ProgressChanged(object sender, SeekBar.ProgressChangedEventArgs e)
+        {
+            SeekBar sb = (SeekBar)sender;
+            if (sb.Progress < lastSymbols)
+            {
+                SymbolsLeft();
+            }
+            if (sb.Progress > lastSymbols)
+            {
+                SymbolsRight();
+            }
+            lastSymbols = sb.Progress;
+        }
+
+        private void RefreshSymbolsSb()
+        {
+            int left = 0, right = 0;
+            foreach (char c in etString.Text)
+            {
+                if (IsCJKUI(c))
+                {
+                    left++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            for (int i = etString.Text.Length - 1; i >= 0; i--)
+            {
+                if (IsCJKUI(etString.Text[i]))
+                {
+                    right++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            sbSymbols.Max = left + right;
+            sbSymbols.ProgressChanged -= SbSymbols_ProgressChanged;
+            sbSymbols.Progress = left;
+            sbSymbols.ProgressChanged += SbSymbols_ProgressChanged;
+            lastSymbols = sbSymbols.Progress;
+        }
+
         private void SelectChars()
         {
             if (etString.Text == "")
@@ -1292,6 +1333,7 @@ namespace Replacer
         private void ShowCharsOnCharmap()
         {
             canvas.DrawColor(Color.Transparent, Mode.Clear);
+            ivCharmap.SetImageBitmap(bitmap);
             int charWidth = llCharmap.Width / 16, charHeight = llCharmap.Height / 16;
             for (int i = first; i < first + 256; i++)
             {
@@ -1309,10 +1351,54 @@ namespace Replacer
             }
         }
 
+        private void SymbolsLeft()
+        {
+            if (etString.Text == "")
+            {
+                return;
+            }
+            string c = CleanSymbols(etString.Text), s = etString.Text;
+            for (int i = 1; i < s.Length; i++)
+            {
+                if (!IsCJKUI(char.Parse(s.Substring(i, 1))))
+                {
+                    c = c.Substring(0, i - 1) + s.Substring(i, 1) + c.Substring(i - 1);
+                }
+            }
+            etString.Text = c;
+        }
+
+        private void SymbolsRight()
+        {
+            if (etString.Text == "")
+            {
+                return;
+            }
+            string c = CleanSymbols(etString.Text), s = etString.Text;
+            for (int i = 0; i < s.Length - 1; i++)
+            {
+                if (!IsCJKUI(char.Parse(s.Substring(i, 1))))
+                {
+                    if (i < c.Length)
+                    {
+                        c = c.Substring(0, i + 1) + s.Substring(i, 1) + c.Substring(i + 1);
+                    }
+                    else
+                    {
+                        c += s.Substring(i, 1);
+                    }
+                }
+            }
+            etString.Text = c;
+        }
+
         private void TabHost_TabChanged(object sender, TabHost.TabChangeEventArgs e)
         {
             switch (e.TabId)
             {
+                case "symbols":
+                    RefreshSymbolsSb();
+                    break;
                 case "charmap":
                     tvCharDescription.Text = "";
                     break;
