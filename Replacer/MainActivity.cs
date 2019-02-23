@@ -110,7 +110,7 @@ namespace Replacer
         private ClipboardManager clipboard;
         private EditText etChar, etCombiningChar, etGotoChar, etNumber, etOld, etRegex, etRegexNew, etString, etNew;
         private ImageView ivCharmap;
-        private int first = 0, lastSymbols = 0, selection = 0;
+        private int first = 0, lastSymbols = 0, selLength = 1, selStart = 0;
         private LinearLayout llCharmap, llCode, llController, llPronunciation;
         private readonly Paint paint = new Paint() {
             TextSize = 36
@@ -121,7 +121,7 @@ namespace Replacer
         private readonly string[] descriptions = new string[0x20000];
         private TabHostEx tabHost;
         private TextView tvChar, tvCharUnicode, tvCharDescription, tvNextChar, tvPrevChar, tvCharPreview, tvStatus;
-        private ToggleButton tglChars;
+        private ToggleButton tbChars, tbSelect;
         private Thread loadDescription;
 
         public struct Data
@@ -189,7 +189,8 @@ namespace Replacer
             sCharmap = FindViewById<Spinner>(Resource.Id.s_charmap);
             sSchema = FindViewById<Spinner>(Resource.Id.s_schema);
             sUrl = FindViewById<Spinner>(Resource.Id.s_url);
-            tglChars = FindViewById<ToggleButton>(Resource.Id.tgl_chars);
+            tbChars = FindViewById<ToggleButton>(Resource.Id.tb_chars);
+            tbSelect = FindViewById<ToggleButton>(Resource.Id.tb_select);
             tvChar = FindViewById<TextView>(Resource.Id.tv_char);
             tvCharUnicode = FindViewById<TextView>(Resource.Id.tv_char_unicode);
             tvCharDescription = FindViewById<TextView>(Resource.Id.tv_char_description);
@@ -246,7 +247,8 @@ namespace Replacer
             ivCharmap.Touch += IvCharmap_Touch;
             sbSymbols.ProgressChanged += SbSymbols_ProgressChanged;
             tabHost.TabChanged += TabHost_TabChanged;
-            tglChars.CheckedChange += TglChars_CheckedChange;
+            tbChars.CheckedChange += TbChars_CheckedChange;
+            tbSelect.CheckedChange += TbSelect_CheckedChange;
             tvChar.Click += TvChars_Click;
             tvChar.LongClick += TvChar_LongClick;
 
@@ -375,10 +377,21 @@ namespace Replacer
 
         private void BLeft_Click(object sender, EventArgs e)
         {
-            if (selection > 0)
+            if (tbSelect.Checked)
             {
-                selection--;
-                SelectChars();
+                if (selLength > 1)
+                {
+                    selLength--;
+                    SelectChars();
+                }
+            }
+            else
+            {
+                if (selStart > 0)
+                {
+                    selStart--;
+                    SelectChars();
+                }
             }
         }
 
@@ -399,9 +412,9 @@ namespace Replacer
 
         private void BPasteLeft_Click(object sender, EventArgs e)
         {
-            etString.Text = etString.Text.Substring(0, selection)
+            etString.Text = etString.Text.Substring(0, selStart)
                 + clipboard.PrimaryClip.GetItemAt(0).Text
-                + etString.Text.Substring(selection);
+                + etString.Text.Substring(selStart);
         }
 
         private void BPasteNew_Click(object sender, EventArgs e)
@@ -421,9 +434,9 @@ namespace Replacer
 
         private void BPasteRight_Click(object sender, EventArgs e)
         {
-            etString.Text = etString.Text.Substring(0, selection + 1)
+            etString.Text = etString.Text.Substring(0, selStart + selLength)
                 + clipboard.PrimaryClip.GetItemAt(0).Text
-                + etString.Text.Substring(selection + 1);
+                + etString.Text.Substring(selStart + selLength);
         }
 
         private void BPickCombining_Click(object sender, EventArgs e)
@@ -460,7 +473,7 @@ namespace Replacer
             llPronunciation.RemoveAllViews();
             new Thread(new ParameterizedThreadStart(LoadPronunciation)).Start(new string[]
             {
-                tglChars.Checked ? tvChar.Text : etString.Text,
+                tbChars.Checked ? tvChar.Text : etString.Text,
                 sUrl.SelectedItem.ToString(),
                 sSchema.SelectedItem.ToString()
             });
@@ -564,10 +577,21 @@ namespace Replacer
 
         private void BRight_Click(object sender, EventArgs e)
         {
-            if (selection < etString.Text.Length - 1)
+            if (tbSelect.Checked)
             {
-                selection++;
-                SelectChars();
+                if (selLength < etString.Text.Length - selStart)
+                {
+                    selLength++;
+                    SelectChars();
+                }
+            }
+            else
+            {
+                if (selStart < etString.Text.Length - 1)
+                {
+                    selStart++;
+                    SelectChars();
+                }
             }
         }
 
@@ -690,11 +714,11 @@ namespace Replacer
         private void BSelectChar_Click(object sender, EventArgs e)
         {
             int selStart = GetStringSelectionStart();
-            if (tglChars.Checked)
+            if (tbChars.Checked)
             {
-                etString.Text = etString.Text.Substring(0, selection)
+                etString.Text = etString.Text.Substring(0, selStart)
                     + tvCharPreview.Text
-                    + etString.Text.Substring(selection + 1);
+                    + etString.Text.Substring(selStart + selLength);
             }
             else
             {
@@ -707,15 +731,15 @@ namespace Replacer
 
         private void BSelectChar_LongClick(object sender, View.LongClickEventArgs e)
         {
-            if (tglChars.Checked ? tvChar.Text == "" : etString.SelectionStart == etString.SelectionEnd)
+            if (tbChars.Checked ? tvChar.Text == "" : etString.SelectionStart == etString.SelectionEnd)
             {
                 return;
             }
             int end = Convert.ToInt32(UnicodeEncode(tvCharPreview.Text)[0], 16), start = 0;
             string s = "";
-            if (tglChars.Checked)
+            if (tbChars.Checked)
             {
-                start = Convert.ToInt32(UnicodeEncode(tvChar.Text)[0], 16);
+                start = Convert.ToInt32(UnicodeEncode(tvChar.Text[0])[0], 16);
             }
             else
             {
@@ -726,11 +750,11 @@ namespace Replacer
                 s += UnicodeDecode(i);
             }
             int selStart = GetStringSelectionStart();
-            if (tglChars.Checked)
+            if (tbChars.Checked)
             {
-                etString.Text = etString.Text.Substring(0, selection)
+                etString.Text = etString.Text.Substring(0, selStart)
                     + s
-                    + etString.Text.Substring(selection + 1);
+                    + etString.Text.Substring(selStart + selLength);
             }
             else
             {
@@ -799,7 +823,7 @@ namespace Replacer
         private void BUnicodeEncode_Click(object sender, EventArgs e)
         {
             string[] u;
-            if (tglChars.Checked)
+            if (tbChars.Checked)
             {
                 u = UnicodeEncode(tvChar.Text);
             }
@@ -869,7 +893,7 @@ namespace Replacer
             {
                 return;
             }
-            etString.Text = etString.Text.Substring(0, selection) + etChar.Text + etString.Text.Substring(selection + 1);
+            etString.Text = etString.Text.Substring(0, selStart) + etChar.Text + etString.Text.Substring(selStart + selLength);
             etChar.Visibility = ViewStates.Gone;
             tvChar.Visibility = ViewStates.Visible;
             etChar.Text = "";
@@ -877,7 +901,7 @@ namespace Replacer
 
         private void EtString_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
-            if (tglChars.Checked)
+            if (tbChars.Checked)
             {
                 SelectChars();
             }
@@ -939,7 +963,7 @@ namespace Replacer
 
         private string GetString()
         {
-            return tglChars.Checked ? tvChar.Text : etString.Text;
+            return tbChars.Checked ? tvChar.Text : etString.Text;
         }
 
         private string GetStringSelecion()
@@ -1228,34 +1252,28 @@ namespace Replacer
 
         private void RefreshSymbolsSb()
         {
+            sbSymbols.ProgressChanged -= SbSymbols_ProgressChanged;
             int left = 0, right = 0;
-            foreach (char c in etString.Text)
+            for (int i = etString.Text.Length - 1; i >= 0; i--)
             {
-                if (IsCJKUI(c))
+                if (!IsCJKUI(etString.Text[i]))
                 {
-                    left++;
-                }
-                else
-                {
+                    left = i;
                     break;
                 }
             }
-            for (int i = etString.Text.Length - 1; i >= 0; i--)
+            for (int i = 0; i < etString.Text.Length; i++)
             {
-                if (IsCJKUI(etString.Text[i]))
+                if (!IsCJKUI(etString.Text[i]))
                 {
-                    right++;
-                }
-                else
-                {
+                    right = etString.Text.Length - i - 1;
                     break;
                 }
             }
             sbSymbols.Max = left + right;
-            sbSymbols.ProgressChanged -= SbSymbols_ProgressChanged;
             sbSymbols.Progress = left;
-            sbSymbols.ProgressChanged += SbSymbols_ProgressChanged;
             lastSymbols = sbSymbols.Progress;
+            sbSymbols.ProgressChanged += SbSymbols_ProgressChanged;
         }
 
         private void SelectChars()
@@ -1267,29 +1285,37 @@ namespace Replacer
                 tvNextChar.Text = "";
                 return;
             }
-            if (selection >= etString.Text.Length)
+            if (selStart + selLength > etString.Text.Length)
             {
-                selection = etString.Text.Length - 1;
+                selStart = etString.Text.Length - 1;
+                selLength = 1;
             }
-            if (selection > 0)
+            if (selStart > 0)
             {
-                tvPrevChar.Text = etString.Text.Substring(selection - 1, 1);
+                tvPrevChar.Text = etString.Text[selStart - 1].ToString();
             }
             else
             {
                 tvPrevChar.Text = "";
             }
-            tvChar.Text = etString.Text.Substring(selection, 1);
-            if (selection < etString.Text.Length - 1)
+            tvChar.Text = etString.Text.Substring(selStart, selLength);
+            if (selStart + selLength < etString.Text.Length)
             {
-                tvNextChar.Text = etString.Text.Substring(selection + 1, 1);
+                tvNextChar.Text = etString.Text[selStart + selLength].ToString();
             }
             else
             {
                 tvNextChar.Text = "";
             }
-            tvCharDescription.Text = GetCharDescription(char.Parse(tvChar.Text));
-            tvStatus.Text = (selection + 1).ToString();
+            tvCharDescription.Text = GetCharDescription(tvChar.Text[tvChar.Text.Length - 1]);
+            if (tbSelect.Checked)
+            {
+                tvStatus.Text = selStart + " ~ " + (selStart + selLength);
+            }
+            else
+            {
+                tvStatus.Text = (selStart + 1).ToString();
+            }
         }
 
         private void SetCharmapSpinnerSelection()
@@ -1307,9 +1333,9 @@ namespace Replacer
 
         private void SetString(string s)
         {
-            if (tglChars.Checked)
+            if (tbChars.Checked)
             {
-                etString.Text = etString.Text.Substring(0, selection) + s + etString.Text.Substring(selection + 1);
+                etString.Text = etString.Text.Substring(0, selStart) + s + etString.Text.Substring(selStart + selLength);
                 SelectChars();
             }
             else
@@ -1405,9 +1431,9 @@ namespace Replacer
             }
             if (e.TabId != "charmap")
             {
-                if (tglChars.Checked && tvChar.Text != "")
+                if (tbChars.Checked && tvChar.Text != "")
                 {
-                    tvCharDescription.Text = GetCharDescription(char.Parse(tvChar.Text));
+                    tvCharDescription.Text = GetCharDescription(tvChar.Text[0]);
                 }
             }
         }
@@ -1419,7 +1445,7 @@ namespace Replacer
                 return;
             }
             etChar.Text = tvChar.Text;
-            etChar.SetSelection(0, 1);
+            etChar.SetSelection(0, etChar.Text.Length);
             tvChar.Visibility = ViewStates.Gone;
             etChar.Visibility = ViewStates.Visible;
             etChar.RequestFocus();
@@ -1427,22 +1453,33 @@ namespace Replacer
 
         private void TvChar_LongClick(object sender, View.LongClickEventArgs e)
         {
-            selection = etString.SelectionStart;
+            selStart = etString.SelectionStart;
+            selLength = 1;
             SelectChars();
         }
 
-        private void TglChars_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        private void TbChars_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             if (e.IsChecked)
             {
                 FindViewById<LinearLayout>(Resource.Id.ll_chars).Visibility = ViewStates.Visible;
+                tbSelect.Visibility = ViewStates.Visible;
                 SelectChars();
             }
             else
             {
+                tbSelect.Visibility = ViewStates.Gone;
                 FindViewById<LinearLayout>(Resource.Id.ll_chars).Visibility = ViewStates.Gone;
                 tvCharDescription.Text = "";
                 tvStatus.Text = etString.Text.Length.ToString();
+            }
+        }
+
+        private void TbSelect_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            if (!e.IsChecked)
+            {
+                selLength = 1;
             }
         }
 

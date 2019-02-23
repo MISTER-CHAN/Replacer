@@ -12,10 +12,18 @@
 		<ToggleButton
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:id="@+id/tgl_chars"
+			android:id="@+id/tb_chars"
 			android:textOn="選擇"
 			android:textOff="全選"
 			android:layout_weight="1" />
+		<ToggleButton
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:id="@+id/tb_select"
+			android:textOn="多選"
+			android:textOff="單選"
+			android:layout_weight="1"
+			android:visibility="gone" />
 		<Button
 			android:text="複製"
 			android:layout_width="match_parent"
