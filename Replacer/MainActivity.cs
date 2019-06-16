@@ -1068,7 +1068,7 @@ namespace Replacer
                 {
                     w++;
                     if (url == "www.yueyv.cn" && w == 15 ||
-                        url == "ykyi.net" && w == 1)
+                        url == "ykyi.net" && w == 100)
                     {
                         pages.Add("");
                         w = 0;
@@ -1114,12 +1114,13 @@ namespace Replacer
                             }
                             html = GetHTML("http://www.yueyv.cn/?keyword=" + u + "&submit=%B2%E9+%D1%AF", "GB2312");
                             html = html.Replace("\r", "").Replace("\n", "");
+                            string[] ws;
                             if (html.Contains("<!--输入的单字单独读音开始 --> "))
                             {
                                 html = html.Mid(html.IndexOf("<!--输入的单字单独读音开始 --> "), html.IndexOf("<!--输入的单字单独读音结束 -->"));
                                 if (html.Contains("<h2>"))
                                 {
-                                    string[] ws = html.Split("<h2>");
+                                    ws = html.Split("<h2>");
                                     List<string> ls = ws.ToList();
                                     ls.RemoveAt(0);
                                     ws = ls.ToArray();
@@ -1142,17 +1143,12 @@ namespace Replacer
                             }
                             break;
                         case "ykyi.net":
-                            foreach (char c in page)
+                            html = GetHTML("https://ykyi.net/search.php?keyword=" + page + "&method=d");
+                            ws = html.Split("单字详情页");
+                            prons = new Array[ws.Length];
+                            for (w = 0; w < ws.Length; w++)
                             {
-                                if ('\u4e00' <= c && c < '\ua000')
-                                {
-                                    html = GetHTML("https://ykyi.net/dict/index.php?char=" + c);
-                                    prons = new Array[1]
-                                    {
-                                        Regex.Matches(html, "(?<=>)[a-z1-6]+(?=</span> 时的粤语)").Cast<Match>().Select(m => m.Value).ToArray()
-                                    };
-                                    break;
-                                }
+                                prons[w] = Regex.Matches(ws[w], "[a-z1-6]+(?=</span>)").Cast<Match>().Select(m => m.Value).ToArray();
                             }
                             break;
                     }
