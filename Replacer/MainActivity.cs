@@ -22,7 +22,7 @@ namespace Replacer
     {
         public static string Mid(this string s, int start, int end)
         {
-            return s.Substring(start, end - start);
+            return s[start..end];
         }
     }
 
@@ -442,11 +442,10 @@ namespace Replacer
         private void BPickCombining_Click(object sender, EventArgs e)
         {
             bool found = false;
-            char c = '\0';
             string combiningChar = "";
             for (int i = etString.Text.Length - 1; i >= 0; i--)
             {
-                c = etString.Text[i];
+                char c = etString.Text[i];
                 if (IsCJKUI(c))
                 {
                     if (found)
@@ -487,7 +486,7 @@ namespace Replacer
         private void BReplace_Click(object sender, EventArgs e)
         {
             char separator = '\0';
-            string r = "", replacedString = "";
+            string replacedString = "";
             string[] olds = new string[1], news = new string[1];
             if (cbMultiold.Checked)
             {
@@ -533,7 +532,7 @@ namespace Replacer
             }
             foreach (string w in news)
             {
-                r = etString.Text;
+                string r = etString.Text;
                 foreach (string f in olds)
                 {
                     if (cbSplit.Checked && !etString.Text.Contains(f))
@@ -572,7 +571,7 @@ namespace Replacer
                 }
                 replacedString += r + separator;
             }
-            etString.Text = replacedString.Substring(0, replacedString.Length - 1);
+            etString.Text = replacedString[0..^1];
         }
 
         private void BRight_Click(object sender, EventArgs e)
@@ -601,13 +600,13 @@ namespace Replacer
             string[] regexs = {
                 "^\\d+$", "^[IVXLCDMivxlcdm̅]+$", "^[ⅠⅤⅩⅬⅭⅮⅯⅰⅴⅹⅼⅽⅾⅿ̅]+$"
             };
-            byte currentCharType = 3, prevCharType = 4;
+            byte prevCharType = 4;
             List<string>[] words = {
                 new List<string>(), new List<string>(), new List<string>(), new List<string>()
             };
             foreach (char c in etString.Text)
             {
-                currentCharType = 3;
+                byte currentCharType = 3;
                 for (byte t = 0; t < regexs.Length; t++)
                 {
                     if (new Regex(regexs[t]).IsMatch(c.ToString()))
@@ -626,10 +625,11 @@ namespace Replacer
                 words[currentCharType][words[currentCharType].ToArray().Length - 1] += c;
                 prevCharType = currentCharType;
             }
-            string numeral = "", result = "";
+
+            string result = "";
             for (int w = 0; w < words[0].ToArray().Length; w++)
             {
-                numeral = "";
+                string numeral = "";
                 for (int t = 0; t < words.Length; t++)
                 {
                     numeral += words[t][w];
@@ -650,11 +650,10 @@ namespace Replacer
                             "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"
                         }
                     };
-                    int arabicDigit = 0;
                     string arabicNumeral = numeral, romanNumeral = "";
                     for (int i = 0; i < arabicNumeral.Length; i++)
                     {
-                        arabicDigit = int.Parse(arabicNumeral.Substring(arabicNumeral.Length - 1 - i, 1));
+                        int arabicDigit = int.Parse(arabicNumeral.Substring(arabicNumeral.Length - 1 - i, 1));
                         if (i == 0)
                         {
                             romanNumeral = romanDigits[3, arabicDigit];
@@ -735,7 +734,8 @@ namespace Replacer
             {
                 return;
             }
-            int end = Convert.ToInt32(UnicodeEncode(tvCharPreview.Text)[0], 16), start = 0;
+
+            int end = Convert.ToInt32(UnicodeEncode(tvCharPreview.Text)[0], 16), start;
             string s = "";
             if (tbChars.Checked)
             {
@@ -1303,7 +1303,7 @@ namespace Replacer
             {
                 tvNextChar.Text = "";
             }
-            tvCharDescription.Text = GetCharDescription(tvChar.Text[tvChar.Text.Length - 1]);
+            tvCharDescription.Text = GetCharDescription(tvChar.Text[^1]);
             if (tbSelect.Checked)
             {
                 tvStatus.Text = selStart + " ~ " + (selStart + selLength);
