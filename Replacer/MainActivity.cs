@@ -117,7 +117,6 @@ namespace Replacer
         };
         private SeekBar sbSymbols;
         private Spinner sCharmap, sSchema, sUrl;
-        private string progress = "";
         private readonly string[] descriptions = new string[0x20000];
         private TabHostEx tabHost;
         private TextView tvChar, tvCharUnicode, tvCharDescription, tvNextChar, tvPrevChar, tvCharPreview, tvStatus;
@@ -928,7 +927,7 @@ namespace Replacer
                 d = descriptions[i];
                 if (d == null)
                 {
-                    d = "字符描述加載中... (" + progress + ")";
+                    d = "字符描述加載中...";
                 }
                 else
                 {
@@ -1013,36 +1012,56 @@ namespace Replacer
 
         private void LoadDescription()
         {
-            string html = "";
-            for (int i = 0; i < 0x20; i++)
+            // ================================ Wikibooks ================================ //
+            //
+            // string html = "";
+            // for (int i = 0; i < 0x20; i++)
+            // {
+            //     if (0x4 <= i && i < 0xa || i == 0xe)
+            //     {
+            //         continue;
+            //     }
+            //     html = "";
+            //     progress = i.ToString("X") + "000 ~ " + i.ToString("X") + "FFF [0/2]";
+            //     try
+            //     {
+            //         html = GetHTML("https://en.wikibooks.org/wiki/Unicode/Character_reference/" + i.ToString("X") + "000-" + i.ToString("X") + "FFF");
+            //         progress = i.ToString("X") + "000 ~ " + i.ToString("X") + "FFF [1/2]";
+            //         html.Substring(html.IndexOf("<td colspan=\"17\" style=\"background:#f8f8f8;text-align:center\"><b>"));
+            //         html.Substring(0, html.IndexOf("</th></tr></tbody>") + 10);
+            //         string[] s = Regex.Matches(html,
+            //             "(?<=<td><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
+            //             "(?<=<td style=\"background:#[0-9a-f]{6}\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
+            //             "(?<=<td style=\"font-size:75%\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
+            //             "(?<=<td style=\"background:#[0-9a-f]{6};font-size:75%\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
+            //             "(?<=<td>)&#(?=.+;\n?</td>)|" +
+            //             "(?<=<td style=\"background:#777777\">)&#(?=.+;\n?</td>)"
+            //             ).Cast<Match>().Select(m => m.Value).ToArray();
+            //         s.CopyTo(descriptions, i * 0x1000);
+            //     }
+            //     catch (Exception)
+            //     {
+            //     }
+            //     progress = "";
+            // }
+            //
+            // =========================================================================== //
+
+            // ================================ Unicode ================================ //
+            //
+            string html = GetHTML("https://www.unicode.org/charts/charindex.html");
+            string[] lines = html.Split('\n');
+            foreach (string line in lines)
             {
-                if (0x4 <= i && i < 0xa || i == 0xe)
+                if (Regex.IsMatch(line, "<tr><td>[ ,0-9A-Za-z]+</td><td><a href=\"PDF/U[0-9A-F]{4,5}\\.pdf\">[0-9A-F]{4,5}</a></td></tr>"))
                 {
-                    continue;
+                    int i = Convert.ToInt32(Regex.Match(line, "(?<=\\.pdf\">)[0-9A-F]{4,5}(?=</a></td></tr>)").Value, 16);
+                    if (i < 0x20000)
+                        descriptions[i] = Regex.Match(line, "(?<=<tr><td>)[ ,0-9A-Za-z]+(?=</td><td><a href=\"PDF/U)").Value;
                 }
-                html = "";
-                progress = i.ToString("X") + "000 ~ " + i.ToString("X") + "FFF [0/2]";
-                try
-                {
-                    html = GetHTML("https://en.wikibooks.org/wiki/Unicode/Character_reference/" + i.ToString("X") + "000-" + i.ToString("X") + "FFF");
-                    progress = i.ToString("X") + "000 ~ " + i.ToString("X") + "FFF [1/2]";
-                    html.Substring(html.IndexOf("<td colspan=\"17\" style=\"background:#f8f8f8;text-align:center\"><b>"));
-                    html.Substring(0, html.IndexOf("</th></tr></tbody>") + 10);
-                    string[] s = Regex.Matches(html,
-                        "(?<=<td><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
-                        "(?<=<td style=\"background:#[0-9a-f]{6}\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
-                        "(?<=<td style=\"font-size:75%\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
-                        "(?<=<td style=\"background:#[0-9a-f]{6};font-size:75%\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
-                        "(?<=<td>)&#(?=.+;\n?</td>)|" +
-                        "(?<=<td style=\"background:#777777\">)&#(?=.+;\n?</td>)"
-                        ).Cast<Match>().Select(m => m.Value).ToArray();
-                    s.CopyTo(descriptions, i * 0x1000);
-                }
-                catch (Exception)
-                {
-                }
-                progress = "";
             }
+            //
+            // ========================================================================== //
         }
 
         private void LoadPronunciation(object o)
@@ -1306,7 +1325,7 @@ namespace Replacer
             tvCharDescription.Text = GetCharDescription(tvChar.Text[^1]);
             if (tbSelect.Checked)
             {
-                tvStatus.Text = selStart + " ~ " + (selStart + selLength);
+                tvStatus.Text = selStart + 1 + " ~ " + (selStart + selLength);
             }
             else
             {
