@@ -543,7 +543,7 @@ namespace Replacer
                         };
                         for (int i = 0; i < r.Length; i++)
                         {
-                            string Char = r.Substring(i, 1);
+                            string Char = r[i..i];
                             if (f.Contains(Char))
                             {
                                 letter += Char;
@@ -551,17 +551,17 @@ namespace Replacer
                             }
                             else
                             {
-                                symbols[symbols.ToArray().Length - 1] += Char;
+                                symbols[symbols.Count - 1] += Char;
                             }
                         }
                         letter = letter.Replace(f, w);
                         r = "";
                         for (int i = 0; i < letter.Length; i++)
                         {
-                            r += symbols[i] + letter.Substring(i, 1);
+                            r += symbols[i] + letter[i..i];
                         }
-                        if (symbols.ToArray().Length > letter.Length)
-                            r += symbols[symbols.ToArray().Length - 1];
+                        if (symbols.Count > letter.Length)
+                            r += symbols[^0];
                     }
                     else
                     {
@@ -621,12 +621,12 @@ namespace Replacer
                         words[t].Add("");
                     }
                 }
-                words[currentCharType][words[currentCharType].ToArray().Length - 1] += c;
+                words[currentCharType][^0] += c;
                 prevCharType = currentCharType;
             }
 
             string result = "";
-            for (int w = 0; w < words[0].ToArray().Length; w++)
+            for (int w = 0; w < words[0].Count; w++)
             {
                 string numeral = "";
                 for (int t = 0; t < words.Length; t++)
@@ -1558,7 +1558,7 @@ namespace Replacer
                 }
                 else if (bin.Substring(0, 2) == "10")
                 {
-                    unicodes[unicodes.ToArray().Length - 1] += bin.Substring(2);
+                    unicodes[^0] += bin.Substring(2);
                 }
                 else
                 {
