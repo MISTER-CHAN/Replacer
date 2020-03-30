@@ -551,7 +551,7 @@ namespace Replacer
                             }
                             else
                             {
-                                symbols[symbols.Count - 1] += Char;
+                                symbols[^1] += Char;
                             }
                         }
                         letter = letter.Replace(f, w);
@@ -1082,7 +1082,7 @@ namespace Replacer
             {
                 column++;
                 char c = s[i];
-                pages[pages.Count - 1] += c;
+                pages[^1] += c;
                 if ('\u4e00' <= c && c < '\ua000')
                 {
                     w++;
@@ -1099,7 +1099,7 @@ namespace Replacer
                 }
                 if (column == 10)
                 {
-                    pages[pages.Count - 1] += '\n';
+                    pages[^1] += '\n';
                     column = 0;
                 }
             }
