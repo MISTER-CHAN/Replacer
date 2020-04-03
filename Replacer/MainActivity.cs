@@ -561,7 +561,7 @@ namespace Replacer
                             r += symbols[i] + letter[i..i];
                         }
                         if (symbols.Count > letter.Length)
-                            r += symbols[^0];
+                            r += symbols[^1];
                     }
                     else
                     {
@@ -621,7 +621,7 @@ namespace Replacer
                         words[t].Add("");
                     }
                 }
-                words[currentCharType][^0] += c;
+                words[currentCharType][^1] += c;
                 prevCharType = currentCharType;
             }
 
@@ -1558,7 +1558,7 @@ namespace Replacer
                 }
                 else if (bin.Substring(0, 2) == "10")
                 {
-                    unicodes[^0] += bin.Substring(2);
+                    unicodes[^1] += bin.Substring(2);
                 }
                 else
                 {
