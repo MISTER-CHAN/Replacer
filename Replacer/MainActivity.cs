@@ -543,7 +543,7 @@ namespace Replacer
                         };
                         for (int i = 0; i < r.Length; i++)
                         {
-                            string Char = r[i..i];
+                            char Char = r[i];
                             if (f.Contains(Char))
                             {
                                 letter += Char;
@@ -558,7 +558,7 @@ namespace Replacer
                         r = "";
                         for (int i = 0; i < letter.Length; i++)
                         {
-                            r += symbols[i] + letter[i..i];
+                            r += symbols[i] + letter[i];
                         }
                         if (symbols.Count > letter.Length)
                             r += symbols[^1];
