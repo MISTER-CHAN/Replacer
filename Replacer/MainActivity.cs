@@ -673,7 +673,7 @@ namespace Replacer
 
         private void BSmall_Click(object sender, EventArgs e)
         {
-            SetStringSelection(Xlit(GetStringSelecion(), "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnoprstuvwxyz", "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡxʏᴢᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘⱽʷˣʸᶻ"));
+            SetStringSelection(Xlit(GetStringSelecion(), "abcdefghijklmnoprstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", "ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘⱽʷˣʸᶻᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡxʏᴢ"));
         }
 
         private void BStrikethrough_Click(object sender, EventArgs e)
@@ -1299,7 +1299,7 @@ namespace Replacer
             {
                 for (int i = 0; i < oldString.Length; i++)
                 {
-                    s = s.Replace(oldString.Substring(i, 1), newString.Substring(i, 1));
+                    s = s.Replace(oldString[i], newString[i]);
                 }
             }
             return s;
