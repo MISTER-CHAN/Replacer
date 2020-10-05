@@ -32,6 +32,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+	<LangVersion>8.0</LangVersion>
     <AndroidUseSharedRuntime>true</AndroidUseSharedRuntime>
     <AndroidLinkMode>None</AndroidLinkMode>
     <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
@@ -148,9 +149,6 @@
     <AndroidResource Include="Resources\mipmap-mdpi\ic.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\pronunciation.axml">
-      <SubType>Designer</SubType>
-    </AndroidResource>
     <Content Include="Resources\mipmap-xhdpi\ic.png" />
     <AndroidResource Include="Resources\mipmap-xxhdpi\ic.png" />
     <AndroidResource Include="Resources\mipmap-xxxhdpi\ic.png" />

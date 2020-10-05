@@ -17,72 +17,6 @@ using static Android.Graphics.PorterDuff;
 
 namespace Replacer
 {
-    
-    public static class Extensions
-    {
-        public static string Mid(this string s, int start, int end)
-        {
-            return s[start..end];
-        }
-    }
-
-    static class Latinization
-    {
-        public static string JyutpingToIpa(string jyutping)
-        {
-            jyutping = Regex.Replace(jyutping, "(^)(a|e|o|uk|ung)", "$1ʔ$2");
-            jyutping = Regex.Replace(jyutping, "eoi", "ɵy̯");
-            jyutping = Regex.Replace(jyutping, "eo", "ɵ");
-            jyutping = Regex.Replace(jyutping, "oe", "œː");
-            jyutping = Regex.Replace(jyutping, "([aeou]i|[aeio]u)", "$1̯");
-            jyutping = Regex.Replace(jyutping, "yu", "yː");
-            jyutping = Regex.Replace(jyutping, "i([umpnt]?\\d)", "iː$1");
-            jyutping = Regex.Replace(jyutping, "u([int]?\\d)", "uː$1");
-            jyutping = Regex.Replace(jyutping, "([^a])a([^a])", "$1ɐ$2");
-            jyutping = Regex.Replace(jyutping, "aa", "aː");
-            jyutping = Regex.Replace(jyutping, "e((u|m|ng|k)|\\d)", "ɛː$1");
-            jyutping = Regex.Replace(jyutping, "o((i|m|n|ng|k)|\\d)", "ɔː$1");
-            jyutping = Regex.Replace(jyutping, "i(ng|k)", "e$1");
-            jyutping = Regex.Replace(jyutping, "u(ng|k)", "o$1");
-            jyutping = Regex.Replace(jyutping, "([gk])w", "$1ʷ");
-            jyutping = Regex.Replace(jyutping, "(^[ptk])", "$1ʰ");
-            jyutping = Regex.Replace(jyutping, "ʰʷ", "ʷʰ");
-            jyutping = Regex.Replace(jyutping, "c", "t͡sʰ");
-            jyutping = Regex.Replace(jyutping, "([ptk])(\\d)", "$1̚$2");
-            jyutping = Regex.Replace(jyutping, "b", "p");
-            jyutping = Regex.Replace(jyutping, "d", "t");
-            jyutping = Regex.Replace(jyutping, "z", "t͡s");
-            jyutping = Regex.Replace(jyutping, "ng", "ŋ");
-            jyutping = Regex.Replace(jyutping, "g", "k");
-            jyutping = Regex.Replace(jyutping, "([ptk]̚)1", "$1˥");
-            jyutping = Regex.Replace(jyutping, "1", "˥˧");
-            jyutping = Regex.Replace(jyutping, "2", "˧˥");
-            jyutping = Regex.Replace(jyutping, "([ptk]̚)3", "$1˧");
-            jyutping = Regex.Replace(jyutping, "3", "˧˧");
-            jyutping = Regex.Replace(jyutping, "4", "˨˩");
-            jyutping = Regex.Replace(jyutping, "5", "˦˥");
-            jyutping = Regex.Replace(jyutping, "([ptk]̚)6", "$1˨");
-            jyutping = Regex.Replace(jyutping, "6", "˨˨");
-            return jyutping;
-        }
-
-        public static string JyutpingToJwytjwyphingjam(string jyutping)
-        {
-            jyutping = Regex.Replace(jyutping, "(^)(a|e|o|uk|ung)", "$1q$2");
-            jyutping = Regex.Replace(jyutping, "(^)t", "$1th");
-            jyutping = Regex.Replace(jyutping, "d", "t");
-            jyutping = Regex.Replace(jyutping, "(^)p", "$1ph");
-            jyutping = Regex.Replace(jyutping, "b", "p");
-            jyutping = Regex.Replace(jyutping, "(^)k", "$1kh");
-            jyutping = Regex.Replace(jyutping, "(^)g", "$1k");
-            jyutping = Regex.Replace(jyutping, "(^)c", "$1tsh");
-            jyutping = Regex.Replace(jyutping, "z", "ts");
-            jyutping = Regex.Replace(jyutping, "jy", "jwy");
-            jyutping = Regex.Replace(jyutping, "yu", "y");
-            jyutping = Regex.Replace(jyutping, "eoi", "eoy");
-            return jyutping;
-        }
-    }
 
     public class TabHostEx : TabHost
     {
@@ -104,19 +38,21 @@ namespace Replacer
     public class MainActivity : AppCompatActivity
     {
         private Bitmap bitmap;
-        private Button bInitCharmap, bPasteOld, bQuery, bReplace, bSelectChar;
+        private Button bInitCharmap, bPasteOld, bReplace, bSelectChar;
+        byte descriptionSource = 1;
         private Canvas canvas;
         private CheckBox cbSingleline, cbIgnoreCase, cbMultiline, cbMultiold, cbSplit, cbMultinew;
         private ClipboardManager clipboard;
         private EditText etChar, etCombiningChar, etGotoChar, etNumber, etOld, etRegex, etRegexNew, etString, etNew;
         private ImageView ivCharmap;
         private int first = 0, lastSymbols = 0, selLength = 1, selStart = 0;
-        private LinearLayout llCharmap, llCode, llController, llPronunciation;
+        private LinearLayout llCharmap, llCode, llController;
         private readonly Paint paint = new Paint() {
             TextSize = 36
         };
         private SeekBar sbSymbols;
-        private Spinner sCharmap, sSchema, sUrl;
+        private Spinner sCharmap;
+        private string progress;
         private readonly string[] descriptions = new string[0x20000];
         private TabHostEx tabHost;
         private TextView tvChar, tvCharUnicode, tvCharDescription, tvNextChar, tvPrevChar, tvCharPreview, tvStatus;
@@ -145,7 +81,6 @@ namespace Replacer
             inflater.Inflate(Resource.Layout.combine, tabHost.TabContentView);
             inflater.Inflate(Resource.Layout.@string, tabHost.TabContentView);
             inflater.Inflate(Resource.Layout.style, tabHost.TabContentView);
-            inflater.Inflate(Resource.Layout.pronunciation, tabHost.TabContentView);
             inflater.Inflate(Resource.Layout.encoder, tabHost.TabContentView);
             inflater.Inflate(Resource.Layout.charmap, tabHost.TabContentView);
             tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("替換").SetContent(Resource.Id.ll_replace));
@@ -154,13 +89,11 @@ namespace Replacer
             tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("組合").SetContent(Resource.Id.ll_combine));
             tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("重複").SetContent(Resource.Id.ll_string));
             tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("樣式").SetContent(Resource.Id.ll_style));
-            tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("發音").SetContent(Resource.Id.ll_pronunciation_main));
             tabHost.AddTab(tabHost.NewTabSpec("").SetIndicator("編碼").SetContent(Resource.Id.ll_encoder));
             tabHost.AddTab(tabHost.NewTabSpec("charmap").SetIndicator("字符映射表").SetContent(Resource.Id.ll_charmap_main));
 
             bInitCharmap = FindViewById<Button>(Resource.Id.b_init_charmap);
             bPasteOld = FindViewById<Button>(Resource.Id.b_paste_old);
-            bQuery = FindViewById<Button>(Resource.Id.b_query);
             bReplace = FindViewById<Button>(Resource.Id.b_replace);
             bSelectChar = FindViewById<Button>(Resource.Id.b_select_char);
             cbIgnoreCase = FindViewById<CheckBox>(Resource.Id.cb_ignore_case);
@@ -183,11 +116,8 @@ namespace Replacer
             llCharmap = FindViewById<LinearLayout>(Resource.Id.ll_charmap);
             llCode = FindViewById<LinearLayout>(Resource.Id.ll_code);
             llController = FindViewById<LinearLayout>(Resource.Id.ll_controller);
-            llPronunciation = FindViewById<LinearLayout>(Resource.Id.ll_pronunciation);
             sbSymbols = FindViewById<SeekBar>(Resource.Id.sbSymbols);
             sCharmap = FindViewById<Spinner>(Resource.Id.s_charmap);
-            sSchema = FindViewById<Spinner>(Resource.Id.s_schema);
-            sUrl = FindViewById<Spinner>(Resource.Id.s_url);
             tbChars = FindViewById<ToggleButton>(Resource.Id.tb_chars);
             tbSelect = FindViewById<ToggleButton>(Resource.Id.tb_select);
             tvChar = FindViewById<TextView>(Resource.Id.tv_char);
@@ -220,7 +150,6 @@ namespace Replacer
             bPasteOld.Click += BPasteOld_Click;
             bPasteOld.LongClick += BPasteOld_LongClick;
             FindViewById<Button>(Resource.Id.b_pick_combining).Click += BPickCombining_Click;
-            bQuery.Click += BQuery_Click;
             bReplace.Click += BReplace_Click;
             FindViewById<Button>(Resource.Id.b_regex_replace).Click += BRegexReplace;
             FindViewById<Button>(Resource.Id.b_right).Click += BRight_Click;
@@ -250,16 +179,6 @@ namespace Replacer
             tbSelect.CheckedChange += TbSelect_CheckedChange;
             tvChar.Click += TvChars_Click;
             tvChar.LongClick += TvChar_LongClick;
-
-            sSchema.Adapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleSpinnerDropDownItem, new string[]
-            {
-                 "粵語拉丁字", "粵拼", "國際音標"
-            });
-
-            sUrl.Adapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleSpinnerDropDownItem, new string[]
-            {
-                 "www.yueyv.cn", "ykyi.net"
-            });
 
             loadDescription = new Thread(LoadDescription);
             loadDescription.Start();
@@ -463,18 +382,6 @@ namespace Replacer
                 }
             }
             etCombiningChar.Text = combiningChar;
-        }
-
-        private void BQuery_Click(object sender, EventArgs e)
-        {
-            bQuery.Enabled = false;
-            llPronunciation.RemoveAllViews();
-            new Thread(new ParameterizedThreadStart(LoadPronunciation)).Start(new string[]
-            {
-                tbChars.Checked ? tvChar.Text : etString.Text,
-                sUrl.SelectedItem.ToString(),
-                sSchema.SelectedItem.ToString()
-            });
         }
 
         private void BRegexReplace(object sender, EventArgs e)
@@ -921,13 +828,15 @@ namespace Replacer
 
         private string GetCharDescription(int i)
         {
+            if (descriptionSource == 0)
+                return tvCharDescription.Text;
             string d = "";
             if (i < 0x4000 || 0xa000 <= i && i < 0xe000 || 0xf000 <= i && i < 0x20000)
             {
                 d = descriptions[i];
                 if (d == null)
                 {
-                    d = "字符描述加載中...";
+                    d = "字符描述加載中..." + progress;
                 }
                 else
                 {
@@ -1012,243 +921,55 @@ namespace Replacer
 
         private void LoadDescription()
         {
-            // ================================ Wikibooks ================================ //
-            //
-            // string html = "";
-            // for (int i = 0; i < 0x20; i++)
-            // {
-            //     if (0x4 <= i && i < 0xa || i == 0xe)
-            //     {
-            //         continue;
-            //     }
-            //     html = "";
-            //     progress = i.ToString("X") + "000 ~ " + i.ToString("X") + "FFF [0/2]";
-            //     try
-            //     {
-            //         html = GetHTML("https://en.wikibooks.org/wiki/Unicode/Character_reference/" + i.ToString("X") + "000-" + i.ToString("X") + "FFF");
-            //         progress = i.ToString("X") + "000 ~ " + i.ToString("X") + "FFF [1/2]";
-            //         html.Substring(html.IndexOf("<td colspan=\"17\" style=\"background:#f8f8f8;text-align:center\"><b>"));
-            //         html.Substring(0, html.IndexOf("</th></tr></tbody>") + 10);
-            //         string[] s = Regex.Matches(html,
-            //             "(?<=<td><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
-            //             "(?<=<td style=\"background:#[0-9a-f]{6}\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
-            //             "(?<=<td style=\"font-size:75%\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
-            //             "(?<=<td style=\"background:#[0-9a-f]{6};font-size:75%\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
-            //             "(?<=<td>)&#(?=.+;\n?</td>)|" +
-            //             "(?<=<td style=\"background:#777777\">)&#(?=.+;\n?</td>)"
-            //             ).Cast<Match>().Select(m => m.Value).ToArray();
-            //         s.CopyTo(descriptions, i * 0x1000);
-            //     }
-            //     catch (Exception)
-            //     {
-            //     }
-            //     progress = "";
-            // }
-            //
-            // =========================================================================== //
-
-            // ================================ Unicode ================================ //
-            //
-            string html = GetHTML("https://www.unicode.org/charts/charindex.html");
-            string[] lines = html.Split('\n');
-            foreach (string line in lines)
+            switch (descriptionSource)
             {
-                if (Regex.IsMatch(line, "<tr><td>[ ,0-9A-Za-z]+</td><td><a href=\"PDF/U[0-9A-F]{4,5}\\.pdf\">[0-9A-F]{4,5}</a></td></tr>"))
-                {
-                    int i = Convert.ToInt32(Regex.Match(line, "(?<=\\.pdf\">)[0-9A-F]{4,5}(?=</a></td></tr>)").Value, 16);
-                    if (i < 0x20000)
-                        descriptions[i] = Regex.Match(line, "(?<=<tr><td>)[ ,0-9A-Za-z]+(?=</td><td><a href=\"PDF/U)").Value;
-                }
-            }
-            //
-            // ========================================================================== //
-        }
-
-        private void LoadPronunciation(object o)
-        {
-            string[] s = (string[])o;
-            LoadPronunciation(s[0], s[1], s[2]);
-        }
-
-        private void LoadPronunciation(string s, string url, string schema)
-        {
-            string html;
-            List<string> pages = new List<string>()
-            {
-                ""
-            };
-            int column = 0, w = 0;
-            for (int i = 0; i < s.Length; i++)
-            {
-                column++;
-                char c = s[i];
-                pages[^1] += c;
-                if ('\u4e00' <= c && c < '\ua000')
-                {
-                    w++;
-                    if (url == "www.yueyv.cn" && w == 15 ||
-                        url == "ykyi.net" && w == 100)
+                case 1:
+                    string html = "";
+                    for (int i = 0; i < 0x20; i++)
                     {
-                        pages.Add("");
-                        w = 0;
-                    }
-                }
-                else if (c == '\n')
-                {
-                    column = 0;
-                }
-                if (column == 10)
-                {
-                    pages[^1] += '\n';
-                    column = 0;
-                }
-            }
-            LinearLayout llLine = null;
-            RunOnUiThread(() =>
-            {
-                llLine = new LinearLayout(this)
-                {
-                    Orientation = Orientation.Horizontal
-                };
-                llLine.SetGravity(GravityFlags.Bottom);
-            });
-            for (int p = 0; p < pages.Count; p++)
-            {
-                string page = pages[p];
-                RunOnUiThread(() =>
-                {
-                    bQuery.Text = "加載中...(" + p + "/" + pages.Count + ")"; 
-                });
-                Array[] prons = null;
-                if (page != "\n")
-                {
-                    switch (url)
-                    {
-                        case "www.yueyv.cn":
-                            byte[] bs = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding("GB2312"), Encoding.UTF8.GetBytes(page));
-                            string u = "";
-                            foreach (byte b in bs)
-                            {
-                                u += "%" + b.ToString("X2");
-                            }
-                            html = GetHTML("http://www.yueyv.cn/?keyword=" + u + "&submit=%B2%E9+%D1%AF", "GB2312");
-                            html = html.Replace("\r", "").Replace("\n", "");
-                            string[] ws;
-                            if (html.Contains("<!--输入的单字单独读音开始 --> "))
-                            {
-                                html = html.Mid(html.IndexOf("<!--输入的单字单独读音开始 --> "), html.IndexOf("<!--输入的单字单独读音结束 -->"));
-                                if (html.Contains("<h2>"))
-                                {
-                                    ws = html.Split("<h2>");
-                                    List<string> ls = ws.ToList();
-                                    ls.RemoveAt(0);
-                                    ws = ls.ToArray();
-                                    prons = new Array[ws.Length];
-                                    for (w = 0; w < ws.Length; w++)
-                                    {
-                                        prons[w] = Regex.Matches(ws[w], "(?<=<br>.)[a-z1-6]+(?=：)").Cast<Match>().Select(m => m.Value).ToArray();
-                                    }
-                                }
-                                else
-                                {
-                                    prons = new Array[1]
-                                    {
-                                        Regex.Matches(html,
-                                            "(?<=<span class=\"phonetic\">)[a-z1-6]+(?=</span>)|" +
-                                            "(?<=<span class=\"phonetic\"><font color=\"#FF0000\">)[a-z1-6]+(?=</font></span>)"
-                                            ).Cast<Match>().Select(m => m.Value).ToArray()
-                                    };
-                                }
-                            }
-                            break;
-                        case "ykyi.net":
-                            html = GetHTML("https://ykyi.net/search.php?keyword=" + page + "&method=d");
-                            ws = html.Split("单字详情页");
-                            prons = new Array[ws.Length];
-                            for (w = 0; w < ws.Length; w++)
-                            {
-                                prons[w] = Regex.Matches(ws[w], "[a-z1-6]+(?=</span>)").Cast<Match>().Select(m => m.Value).ToArray();
-                            }
-                            break;
-                    }
-                }
-                RunOnUiThread(() =>
-                {
-                    TextView text;
-                    w = 0;
-                    for (int i = 0; i < page.Length; i++)
-                    {
-                        char c = page[i];
-                        if (c == '\n')
+                        if (0x4 <= i && i < 0xa || i == 0xe)
                         {
-                            llPronunciation.AddView(llLine);
-                            llLine = new LinearLayout(this)
-                            {
-                                Orientation = Orientation.Horizontal
-                            };
-                            llLine.SetGravity(GravityFlags.Bottom);
+                            continue;
                         }
-                        LinearLayout layout = new LinearLayout(this)
+                        html = "";
+                        progress = i.ToString("X") + "000 ~ " + i.ToString("X") + "FFF [0/2]";
+                        try
                         {
-                            Orientation = Orientation.Vertical
-                        };
-                        if ('\u4e00' <= c && c < '\ua000')
-                        {
-                            if (prons != null)
-                            {
-                                if (prons[w].Length > 0)
-                                {
-                                    string t = "";
-                                    switch (schema)
-                                    {
-                                        case "粵語拉丁字":
-                                            foreach (string pron in prons[w])
-                                            {
-                                                t += "\n" + Latinization.JyutpingToJwytjwyphingjam(pron);
-                                            }
-                                            break;
-                                        case "粵拼":
-                                            foreach (string pron in prons[w])
-                                            {
-                                                t += "\n" + pron;
-                                            }
-                                            break;
-                                        case "國際音標":
-                                            foreach (string pron in prons[w])
-                                            {
-                                                t += "\n[" + Latinization.JyutpingToIpa(pron) + "]";
-                                            }
-                                            break;
-                                    }
-                                    text = new TextView(this)
-                                    {
-                                        Gravity = GravityFlags.Center,
-                                        Text = t.Substring(1)
-                                    };
-                                    layout.AddView(text);
-                                }
-                            }
-                            w++;
+                            html = GetHTML("https://en.wikibooks.org/wiki/Unicode/Character_reference/" + i.ToString("X") + "000-" + i.ToString("X") + "FFF");
+                            progress = " (" + i.ToString("X") + "000 ~ " + i.ToString("X") + "FFF [1/2])";
+                            html.Substring(html.IndexOf("<td colspan=\"17\" style=\"background:#f8f8f8;text-align:center\"><b>"));
+                            html.Substring(0, html.IndexOf("</th></tr></tbody>") + 10);
+                            string[] s = Regex.Matches(html,
+                                "(?<=<td><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
+                                "(?<=<td style=\"background:#[0-9a-f]{6}\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
+                                "(?<=<td style=\"font-size:75%\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
+                                "(?<=<td style=\"background:#[0-9a-f]{6};font-size:75%\"><span title=\").+(?=\" style=\"cursor:help;\" id=\"title\" class=\"htitle\">)|" +
+                                "(?<=<td>)&#(?=.+;\n?</td>)|" +
+                                "(?<=<td style=\"background:#777777\">)&#(?=.+;\n?</td>)"
+                                ).Cast<Match>().Select(m => m.Value).ToArray();
+                            s.CopyTo(descriptions, i * 0x1000);
                         }
-                        text = new TextView(this)
+                        catch (Exception)
                         {
-                            Gravity = GravityFlags.Center,
-                            Text = c.ToString()
-                        };
-#pragma warning disable CS0618 // 类型或成员已过时
-                        text.SetTextAppearance(this, Resource.Style.TextAppearance_AppCompat_Large);
-#pragma warning restore CS0618 // 类型或成员已过时
-                        layout.AddView(text);
-                        llLine.AddView(layout);
+                        }
+                        progress = "";
                     }
-                });
+                    break;
+                case 2:
+                    progress = "";
+                    html = GetHTML("https://www.unicode.org/charts/charindex.html");
+                    string[] lines = html.Split('\n');
+                    foreach (string line in lines)
+                    {
+                        if (Regex.IsMatch(line, "<tr><td>[ ,0-9A-Za-z]+</td><td><a href=\"PDF/U[0-9A-F]{4,5}\\.pdf\">[0-9A-F]{4,5}</a></td></tr>"))
+                        {
+                            int i = Convert.ToInt32(Regex.Match(line, "(?<=\\.pdf\">)[0-9A-F]{4,5}(?=</a></td></tr>)").Value, 16);
+                            if (i < 0x20000)
+                                descriptions[i] = Regex.Match(line, "(?<=<tr><td>)[ ,0-9A-Za-z]+(?=</td><td><a href=\"PDF/U)").Value;
+                        }
+                    }
+                    break;
             }
-            RunOnUiThread(() =>
-            {
-                llPronunciation.AddView(llLine);
-                bQuery.Text = "査詢";
-                bQuery.Enabled = true;
-            });
         }
 
         private void SbSymbols_ProgressChanged(object sender, SeekBar.ProgressChangedEventArgs e)
